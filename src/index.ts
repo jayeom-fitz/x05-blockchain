@@ -7,6 +7,14 @@ class Block {
   public data: string;
   public timestamp: number;
 
+  static validateStructure = (aBlock: Block) : boolean => 
+    typeof aBlock.index === "number" &&
+    typeof aBlock.hash === "string" &&
+    typeof aBlock.previousHash === "string" &&
+    typeof aBlock.data === "string" &&
+    typeof aBlock.timestamp === "number";
+    
+
   static calculateBlockHash = (
     index: number,
     previousHash: string,
@@ -39,5 +47,43 @@ const getBlockchain = () : Block[] => blockchain;
 const getLatestBlock = () : Block => blockchain[blockchain.length-1];
 
 const getNewTimeStamp = () : number => Math.round(new Date().getTime() / 1000);
+
+const createNewBlock = (data: string): Block => {
+  const previousBlock: Block = getLatestBlock();
+  const newIndex: number = previousBlock.index + 1;
+  const nextTimestamp: number = getNewTimeStamp();
+  const nextHash: string = Block.calculateBlockHash(
+    newIndex, 
+    previousBlock.hash, 
+    data,
+    nextTimestamp
+  );
+
+  const newBlock: Block = new Block(
+    newIndex, 
+    nextHash,
+    previousBlock.hash, 
+    data,
+    nextTimestamp
+  );
+
+  return newBlock;
+};
+
+const isBlockValid = (
+  candidateBlock: Block, 
+  previousBlock: Block) : boolean => {
+  if(!Block.validateStructure(candidateBlock)) {
+    return false;
+  } else if(previousBlock.index + 1 !== candidateBlock.index) {
+    return false;
+  } else if(previousBlock.hash !== candidateBlock.previousHash) {
+    return false;
+  } 
+  return true;
+};
+
+console.log(createNewBlock("hello"));
+console.log(createNewBlock("bye bye"));
 
 export {};
